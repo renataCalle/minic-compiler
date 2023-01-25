@@ -1,0 +1,91 @@
+Token regular expression
+
+int        = [0-9]+
+identifier = [a-zA-Z_][a-zA-Z0-9_]*
+newline    = \n
+whitespace = [ \t\r]+
+comment    = "//".*
+blkcomment1= "<!--"[^]*"-->"
+blkcomment2= "["[^]*"]"
+
+"func"            FUNC      
+"return"          RETURN    
+"var"             VAR       
+"if"              IF        
+"then"            THEN      
+"else"            ELSE      
+"begin"           BEGIN     
+"end"             END       
+"while"           WHILE     
+"("               LPAREN    
+")"               RPAREN    
+"int"             INT       
+"bool"            BOOL      
+"print"           PRINT     
+"<-"              ASSIGN    
+"->"              FUNCRET   
+"::"              TYPEOF    
+"+"               ADD       
+"-"               SUB       
+"*"               MUL       
+"/"               DIV       
+"%"               MOD       
+"and"             AND       
+"or"              OR        
+"not"             NOT       
+"<"               LT        
+">"               GT        
+"<="              LE        
+">="              GE        
+"="               EQ        
+"!="              NE        
+";"               SEMI      
+","               COMMA     
+"true"|"false"    BOOL_LIT  
+{int}             INT_LIT   
+{identifier}      IDENT     
+{comment}         COMMENT   
+{newline}         NEWLINE   
+{whitespace}      WHITESPACE
+{blkcomment1}     BLKCOMMENT
+{blkcomment2}     BLKCOMMENT
+
+======================================================================================================
+mini-C context-free grammar
+
+%right  ASSIGN
+%left   OR
+%left   AND
+%right  NOT
+%left   EQ      NE
+%left   LE      LT      GE      GT
+%left   ADD     SUB
+%left   MUL     DIV     MOD
+
+program        ->  decl_list
+decl_list      ->  decl_list  decl  |  eps
+decl           ->  fun_defn
+fun_defn       ->  FUNC  IDENT  TYPEOF  LPAREN  params  RPAREN  FUNCRET  prim_type  BEGIN  local_decls  stmt_list  END
+params         ->  param_list  |  eps
+param_list     ->  param_list  COMMA  param  |  param
+param          ->  IDENT  TYPEOF  type_spec
+type_spec      ->  prim_type
+prim_type      ->  INT  |  BOOL
+local_decls    ->  local_decls  local_decl  |  eps
+local_decl     ->  VAR  IDENT  TYPEOF  type_spec  SEMI
+stmt_list      ->  stmt_list  stmt  |  eps
+stmt           ->  assign_stmt  |  print_stmt  |  return_stmt  |  if_stmt  |  while_stmt  |  compound_stmt
+assign_stmt    ->  IDENT  ASSIGN  expr  SEMI
+print_stmt     ->  PRINT  expr  SEMI
+return_stmt    ->  RETURN  expr  SEMI
+if_stmt        ->  IF  expr  THEN stmt_list  ELSE stmt_list  END
+while_stmt     ->  WHILE  expr  compound_stmt
+compound_stmt  ->  BEGIN  local_decls  stmt_list  END
+args           ->  arg_list  |  eps
+arg_list       ->  arg_list  COMMA  expr  |  expr
+expr           ->  expr  AND  expr  |  expr  OR   expr  |  NOT  expr
+                |  expr  EQ   expr  |  expr  NE   expr  |  expr  LE   expr  |  expr  LT   expr  |  expr  GE   expr  |  expr  GT  expr
+                |  expr  ADD  expr  |  expr  SUB  expr  |  expr  MUL  expr  |  expr  DIV  expr  |  expr  MOD  expr
+                |  LPAREN  expr  RPAREN
+                |  IDENT  |  BOOL_LIT  |  INT_LIT
+                |  IDENT  LPAREN  args  RPAREN
